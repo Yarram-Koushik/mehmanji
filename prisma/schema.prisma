@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  phone        String    @default("")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  weddings     Wedding[]
+}
+
+model Wedding {
+  id            String       @id @default(cuid())
+  userId        String
+  brideName     String
+  groomName     String
+  familyName    String
+  weddingDate   DateTime
+  venue         String
+  city          String
+  coverImageUrl String       @default("")
+  themeColor    String       @default("#B91C6C")
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events        Event[]
+  guests        Guest[]
+  guestGroups   GuestGroup[]
+
+  @@index([userId])
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  weddingId String
+  name      String
+  type      String   @default("OTHER")
+  eventDate DateTime
+  startTime String   @default("")
+  endTime   String   @default("")
+  venue     String   @default("")
+  address   String   @default("")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  wedding   Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  rsvps     Rsvp[]
+
+  @@index([weddingId])
+}
+
+model GuestGroup {
+  id        String   @id @default(cuid())
+  weddingId String
+  name      String
+  color     String   @default("#6B7280")
+  createdAt DateTime @default(now())
+  wedding   Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  guests    Guest[]
+
+  @@index([weddingId])
+}
+
+model Guest {
+  id              String      @id @default(cuid())
+  weddingId       String
+  groupId         String?
+  name            String
+  phone           String      @default("")
+  email           String      @default("")
+  token           String      @unique @default(cuid())
+  whatsappMessage String      @default("")
+  notes           String      @default("")
+  isDeleted       Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  wedding         Wedding     @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  group           GuestGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  rsvps           Rsvp[]
+
+  @@index([weddingId])
+  @@index([groupId])
+}
+
+model Rsvp {
+  id           String   @id @default(cuid())
+  guestId      String
+  eventId      String
+  status       String   @default("PENDING")
+  partySize    Int      @default(1)
+  vegCount     Int      @default(0)
+  nonVegCount  Int      @default(0)
+  jainCount    Int      @default(0)
+  veganCount   Int      @default(0)
+  arrivalTime  String   @default("ON_TIME")
+  dietaryNotes String   @default("")
+  respondedAt  DateTime?
+  updatedAt    DateTime @updatedAt
+  guest        Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([guestId, eventId])
+  @@index([eventId])
+}
