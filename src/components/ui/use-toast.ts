@@ -102,8 +102,10 @@ function getSnapshot(): { toasts: Toast[] } {
   return memoryState;
 }
 
+const SERVER_SNAPSHOT: { toasts: Toast[] } = { toasts: [] };
+
 function getServerSnapshot(): { toasts: Toast[] } {
-  return { toasts: [] };
+  return SERVER_SNAPSHOT;
 }
 
 interface ToastInput {
