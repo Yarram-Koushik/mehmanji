@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { Plus, CalendarHeart, MapPin, Users, ArrowRight, Sparkles } from "lucide-react";
+import { Plus, CalendarHeart, MapPin, Users, ArrowRight, Sparkles, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
 interface WeddingItem {
@@ -33,6 +33,8 @@ export default function WeddingsPage() {
   const [loading, setLoading] = React.useState(true);
   const [openModal, setOpenModal] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
+  const [weddingToDelete, setWeddingToDelete] = React.useState<WeddingItem | null>(null);
+  const [deleting, setDeleting] = React.useState(false);
 
   const [formData, setFormData] = React.useState({
     brideName: "",
@@ -97,6 +99,31 @@ export default function WeddingsPage() {
       toast({ title: "Error", description: "Could not create wedding", variant: "destructive" });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDeleteWedding = async () => {
+    if (!weddingToDelete) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/weddings/${weddingToDelete.id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        toast({
+          title: "Wedding Deleted",
+          description: `"${weddingToDelete.familyName}" has been removed from both client and server.`,
+        });
+        setWeddings((prev) => prev.filter((w) => w.id !== weddingToDelete.id));
+        setWeddingToDelete(null);
+      } else {
+        const err = await res.json();
+        toast({ title: "Failed to delete", description: err.error, variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Could not delete wedding", variant: "destructive" });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -285,9 +312,20 @@ export default function WeddingsPage() {
                   <Badge className="bg-[#FCE7F3] text-[#B91C6C] border-0 text-[10px] font-bold">
                     {w.city}
                   </Badge>
-                  <span className="text-xs font-semibold text-[#78716C]">
-                    {formatDate(w.weddingDate)}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-[#78716C]">
+                      {formatDate(w.weddingDate)}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setWeddingToDelete(w)}
+                      className="h-7 w-7 p-0 text-[#78716C] hover:text-red-600 hover:bg-red-50 transition-colors"
+                      title="Delete Wedding"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </div>
                 <CardTitle className="text-lg font-bold text-[#1C1917] mt-2">
                   {w.familyName}
@@ -334,6 +372,43 @@ export default function WeddingsPage() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!weddingToDelete} onOpenChange={(open) => !open && setWeddingToDelete(null)}>
+        <DialogContent className="max-w-md bg-white border-[#E8DDD3]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-red-600 flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-600" />
+              Delete Wedding Celebration?
+            </DialogTitle>
+            <DialogDescription className="text-xs text-[#78716C] pt-2 leading-relaxed">
+              Are you sure you want to delete <strong className="text-[#1C1917] font-bold">&quot;{weddingToDelete?.familyName}&quot;</strong>?
+              <br /><br />
+              This will permanently delete the wedding and all of its associated sub-events, guests, RSVPs, and catering reports from both client and server. <strong>This action cannot be undone.</strong>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="pt-3 gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setWeddingToDelete(null)}
+              disabled={deleting}
+              className="border-[#E8DDD3] cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDeleteWedding}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 text-white cursor-pointer"
+            >
+              {deleting ? "Deleting..." : "Yes, Delete Wedding"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

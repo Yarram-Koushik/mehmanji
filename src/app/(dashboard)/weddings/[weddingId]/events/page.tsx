@@ -51,6 +51,8 @@ function EventsPageInner() {
   const [loading, setLoading] = React.useState(true);
   const [openAddModal, setOpenAddModal] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
+  const [eventToDelete, setEventToDelete] = React.useState<SubEvent | null>(null);
+  const [deleting, setDeleting] = React.useState(false);
 
   const [formData, setFormData] = React.useState({
     name: "",
@@ -118,19 +120,26 @@ function EventsPageInner() {
     }
   };
 
-  const handleDelete = async (eventId: string, name: string) => {
-    if (!confirm(`Delete ${name}? All associated RSVP responses will also be removed.`)) return;
+  const handleDeleteConfirm = async () => {
+    if (!eventToDelete) return;
+    setDeleting(true);
 
     try {
-      const res = await fetch(`/api/weddings/${weddingId}/events/${eventId}`, {
+      const res = await fetch(`/api/weddings/${weddingId}/events/${eventToDelete.id}`, {
         method: "DELETE",
       });
       if (res.ok) {
-        toast({ title: "Event deleted", description: `${name} has been removed.` });
-        setEvents(events.filter((e) => e.id !== eventId));
+        toast({ title: "Event deleted", description: `"${eventToDelete.name}" has been removed.` });
+        setEvents((prev) => prev.filter((e) => e.id !== eventToDelete.id));
+        setEventToDelete(null);
+      } else {
+        const err = await res.json();
+        toast({ title: "Failed to delete", description: err.error, variant: "destructive" });
       }
     } catch {
       toast({ title: "Error", description: "Could not delete event", variant: "destructive" });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -319,8 +328,9 @@ function EventsPageInner() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDelete(ev.id, ev.name)}
-                      className="h-7 w-7 p-0 text-[#78716C] hover:text-red-600"
+                      onClick={() => setEventToDelete(ev)}
+                      className="h-7 w-7 p-0 text-[#78716C] hover:text-red-600 hover:bg-red-50 transition-colors"
+                      title="Delete Sub-Event"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
@@ -374,6 +384,43 @@ function EventsPageInner() {
           })}
         </div>
       )}
+
+      {/* Delete Event Confirmation Dialog */}
+      <Dialog open={!!eventToDelete} onOpenChange={(open) => !open && setEventToDelete(null)}>
+        <DialogContent className="max-w-md bg-white border-[#E8DDD3]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-red-600 flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-600" />
+              Delete Ceremony / Sub-Event?
+            </DialogTitle>
+            <DialogDescription className="text-xs text-[#78716C] pt-2 leading-relaxed">
+              Are you sure you want to delete <strong className="text-[#1C1917] font-bold">&quot;{eventToDelete?.name}&quot;</strong>?
+              <br /><br />
+              All RSVP responses and meal preferences for this specific event will also be permanently removed from both client and server. <strong>This action cannot be undone.</strong>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="pt-3 gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setEventToDelete(null)}
+              disabled={deleting}
+              className="border-[#E8DDD3] cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 text-white cursor-pointer"
+            >
+              {deleting ? "Deleting..." : "Yes, Delete Event"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

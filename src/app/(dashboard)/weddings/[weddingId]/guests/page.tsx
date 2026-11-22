@@ -79,6 +79,8 @@ function GuestsPageInner() {
   const [openAddModal, setOpenAddModal] = React.useState(false);
   const [openBulkModal, setOpenBulkModal] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
+  const [guestToDelete, setGuestToDelete] = React.useState<GuestItem | null>(null);
+  const [deleting, setDeleting] = React.useState(false);
 
   // Single guest form
   const [singleForm, setSingleForm] = React.useState({
@@ -198,19 +200,26 @@ function GuestsPageInner() {
   };
 
   // Handle delete guest
-  const handleDeleteGuest = async (guestId: string, name: string) => {
-    if (!confirm(`Are you sure you want to remove ${name}?`)) return;
+  const handleDeleteConfirm = async () => {
+    if (!guestToDelete) return;
+    setDeleting(true);
 
     try {
-      const res = await fetch(`/api/weddings/${weddingId}/guests/${guestId}`, {
+      const res = await fetch(`/api/weddings/${weddingId}/guests/${guestToDelete.id}`, {
         method: "DELETE",
       });
       if (res.ok) {
-        toast({ title: "Guest removed", description: `${name} has been removed.` });
-        setGuests(guests.filter((g) => g.id !== guestId));
+        toast({ title: "Guest removed", description: `"${guestToDelete.name}" has been removed.` });
+        setGuests((prev) => prev.filter((g) => g.id !== guestToDelete.id));
+        setGuestToDelete(null);
+      } else {
+        const err = await res.json();
+        toast({ title: "Failed to delete", description: err.error, variant: "destructive" });
       }
     } catch {
       toast({ title: "Error", description: "Failed to delete guest", variant: "destructive" });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -625,8 +634,9 @@ function GuestsPageInner() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDeleteGuest(guest.id, guest.name)}
-                        className="h-8 px-2 text-[#78716C] hover:text-red-600 cursor-pointer"
+                        onClick={() => setGuestToDelete(guest)}
+                        className="h-8 px-2 text-[#78716C] hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                        title="Remove Guest"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
@@ -638,6 +648,43 @@ function GuestsPageInner() {
           })}
         </div>
       )}
+
+      {/* Delete Guest Confirmation Dialog */}
+      <Dialog open={!!guestToDelete} onOpenChange={(open) => !open && setGuestToDelete(null)}>
+        <DialogContent className="max-w-md bg-white border-[#E8DDD3]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-red-600 flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-600" />
+              Remove Guest?
+            </DialogTitle>
+            <DialogDescription className="text-xs text-[#78716C] pt-2 leading-relaxed">
+              Are you sure you want to remove <strong className="text-[#1C1917] font-bold">&quot;{guestToDelete?.name}&quot;</strong>?
+              <br /><br />
+              All RSVP responses, party size, and dietary preferences for this guest will also be removed. <strong>This action cannot be undone.</strong>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="pt-3 gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setGuestToDelete(null)}
+              disabled={deleting}
+              className="border-[#E8DDD3] cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 text-white cursor-pointer"
+            >
+              {deleting ? "Deleting..." : "Yes, Remove Guest"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

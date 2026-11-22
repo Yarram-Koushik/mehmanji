@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Users,
   CheckCircle2,
@@ -22,6 +23,7 @@ import {
   ExternalLink,
   MessageCircle,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
@@ -74,6 +76,32 @@ function WeddingOverviewInner() {
 
   const [wedding, setWedding] = React.useState<WeddingDetail | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
+  const [deleting, setDeleting] = React.useState(false);
+
+  const handleDeleteWedding = async () => {
+    if (!wedding) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/weddings/${weddingId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        toast({
+          title: "Wedding Deleted",
+          description: `"${wedding.familyName}" has been completely removed from both client and server.`,
+        });
+        router.push("/weddings");
+      } else {
+        const err = await res.json();
+        toast({ title: "Failed to delete", description: err.error, variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Could not delete wedding", variant: "destructive" });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   React.useEffect(() => {
     async function fetchDetail() {
@@ -170,6 +198,14 @@ function WeddingOverviewInner() {
                 Catering Sheet
               </Button>
             </Link>
+            <Button
+              variant="outline"
+              onClick={() => setOpenDeleteModal(true)}
+              className="border-red-300/60 bg-red-950/20 text-red-100 hover:bg-red-600 hover:text-white hover:border-red-600 font-semibold text-xs h-10 transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4 mr-1.5" />
+              Delete Wedding
+            </Button>
           </div>
         </div>
       </div>
@@ -390,6 +426,43 @@ function WeddingOverviewInner() {
           </div>
         </Card>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={openDeleteModal} onOpenChange={setOpenDeleteModal}>
+        <DialogContent className="max-w-md bg-white border-[#E8DDD3]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-red-600 flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-600" />
+              Delete Entire Wedding Celebration?
+            </DialogTitle>
+            <DialogDescription className="text-xs text-[#78716C] pt-2 leading-relaxed">
+              Are you sure you want to delete <strong className="text-[#1C1917] font-bold">&quot;{wedding.familyName}&quot;</strong>?
+              <br /><br />
+              This will permanently delete the wedding celebration and all of its associated sub-events, guests, RSVPs, dietary records, and catering reports from both client and server. <strong>This action cannot be undone.</strong>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="pt-3 gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpenDeleteModal(false)}
+              disabled={deleting}
+              className="border-[#E8DDD3] cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDeleteWedding}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 text-white cursor-pointer"
+            >
+              {deleting ? "Deleting..." : "Yes, Delete Wedding"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
