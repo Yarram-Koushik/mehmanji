@@ -22,7 +22,7 @@ import {
   Send,
   PartyPopper,
 } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { formatDate, sortEventsChronologically } from "@/lib/utils";
 
 interface RsvpEvent {
   id: string;
@@ -159,7 +159,6 @@ function GuestRsvpInner() {
   const handlePartySizeChange = (eventId: string, newSize: number) => {
     const clamped = Math.max(1, Math.min(10, newSize));
     const current = rsvpState[eventId];
-    // By default, set vegCount to clamped if no other diet set
     const totalSpecific = current.nonVegCount + current.jainCount + current.veganCount;
     const remainingVeg = Math.max(0, clamped - totalSpecific);
 
@@ -197,8 +196,8 @@ function GuestRsvpInner() {
       if (res.ok) {
         setSubmitted(true);
         toast({
-          title: "RSVP Confirmed! 🎉",
-          description: "Your response has been saved. The family has been notified!",
+          title: "Attendance Confirmed! 🎉",
+          description: "Thank you for confirming. The family has been notified!",
         });
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
@@ -206,7 +205,7 @@ function GuestRsvpInner() {
         toast({ title: "Submission Failed", description: err.error, variant: "destructive" });
       }
     } catch {
-      toast({ title: "Error", description: "Could not submit RSVP. Please try again.", variant: "destructive" });
+      toast({ title: "Error", description: "Could not submit your confirmation. Please try again.", variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -214,12 +213,12 @@ function GuestRsvpInner() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFFBF5] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center p-4">
         <div className="text-center space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-[#B91C6C] text-white flex items-center justify-center mx-auto animate-pulse">
-            <Heart className="w-6 h-6 fill-white" />
+          <div className="w-12 h-12 rounded-2xl bg-[#1F2E23] text-[#C5A059] border border-[#C5A059]/40 flex items-center justify-center mx-auto animate-pulse">
+            <Heart className="w-6 h-6 fill-[#C5A059]" />
           </div>
-          <p className="text-sm font-semibold text-[#78716C]">Opening Wedding Invitation...</p>
+          <p className="text-sm font-medium text-[#6E6A63]">Opening Wedding Invitation...</p>
         </div>
       </div>
     );
@@ -227,13 +226,13 @@ function GuestRsvpInner() {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-[#FFFBF5] flex items-center justify-center p-4">
-        <Card className="max-w-md w-full p-8 text-center border-[#E8DDD3] bg-white">
-          <div className="w-12 h-12 rounded-xl bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
+      <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center p-4">
+        <Card className="max-w-md w-full p-8 text-center border-[#EAE5DF] bg-white rounded-2xl shadow-sm">
+          <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-4 border border-rose-200">
             <XCircle className="w-6 h-6" />
           </div>
-          <h2 className="text-lg font-bold text-[#1C1917]">Invalid Invitation Link</h2>
-          <p className="text-xs text-[#78716C] mt-2">
+          <h2 className="font-serif text-xl font-bold text-[#1F1E1C]">Invalid Invitation Link</h2>
+          <p className="text-xs text-[#6E6A63] mt-2 leading-relaxed">
             This invitation link is expired or does not exist. Please contact the wedding organizer on WhatsApp for a new link.
           </p>
         </Card>
@@ -242,62 +241,62 @@ function GuestRsvpInner() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFBF5] text-[#1C1917] pb-16">
+    <div className="min-h-screen bg-[#FAF8F5] text-[#1F1E1C] pb-20 font-sans">
       {/* Decorative Top Accent Bar */}
-      <div className="h-2 bg-gradient-to-r from-[#B91C6C] via-[#D97706] to-[#B91C6C]" />
+      <div className="h-2 bg-gradient-to-r from-[#1F2E23] via-[#C5A059] to-[#1F2E23]" />
 
       <div className="max-w-2xl mx-auto px-4 pt-6 sm:pt-10 space-y-6">
-        {/* Wedding Invitation Card */}
-        <div className="rounded-3xl bg-white border border-[#E8DDD3] shadow-xl shadow-stone-200/50 overflow-hidden text-center p-6 sm:p-10 relative">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FCE7F3] text-[#B91C6C] text-xs font-bold uppercase tracking-widest mb-4">
+        {/* Luxury Wedding Invitation Card */}
+        <div className="rounded-3xl bg-white border border-[#EAE5DF] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.05)] overflow-hidden text-center p-7 sm:p-11 relative">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#FBF8F1] border border-[#C5A059]/30 text-[#C5A059] text-xs font-semibold uppercase tracking-widest mb-4">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Wedding Celebration</span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-black text-[#1C1917] tracking-tight">
+          <h1 className="font-serif text-3xl sm:text-5xl font-bold text-[#1F1E1C] tracking-tight">
             {data.wedding.familyName}
           </h1>
 
-          <p className="text-base sm:text-lg text-[#B91C6C] font-semibold mt-1">
-            {data.wedding.brideName} &amp; {data.wedding.groomName}
+          <p className="font-serif text-lg sm:text-xl text-[#C5A059] font-medium mt-1.5 italic">
+            Celebrating {data.wedding.brideName} &amp; {data.wedding.groomName}
           </p>
 
-          <div className="my-6 py-4 border-y border-[#E8DDD3] grid grid-cols-2 gap-2 text-xs">
+          <div className="my-6 py-4 border-y border-[#EAE5DF] grid grid-cols-2 gap-2 text-xs">
             <div className="flex flex-col items-center">
-              <Calendar className="w-4 h-4 text-[#D97706] mb-1" />
-              <span className="font-bold text-[#1C1917]">{formatDate(data.wedding.weddingDate)}</span>
-              <span className="text-[#78716C] text-[11px]">Wedding Date</span>
+              <Calendar className="w-4 h-4 text-[#C5A059] mb-1" />
+              <span className="font-semibold text-[#1F1E1C] tabular-nums">{formatDate(data.wedding.weddingDate)}</span>
+              <span className="text-[#6E6A63] text-[11px]">Wedding Date</span>
             </div>
             <div className="flex flex-col items-center">
-              <MapPin className="w-4 h-4 text-[#B91C6C] mb-1" />
-              <span className="font-bold text-[#1C1917] truncate max-w-[180px]">{data.wedding.city}</span>
-              <span className="text-[#78716C] text-[11px] truncate max-w-[180px]">{data.wedding.venue}</span>
+              <MapPin className="w-4 h-4 text-[#7A8B74] mb-1" />
+              <span className="font-semibold text-[#1F1E1C] truncate max-w-[180px]">{data.wedding.city}</span>
+              <span className="text-[#6E6A63] text-[11px] truncate max-w-[180px]">{data.wedding.venue}</span>
             </div>
           </div>
 
           {/* Personal Greeting for Guest */}
-          <div className="p-4 rounded-2xl bg-[#FFFBF5] border border-[#E8DDD3] text-center">
-            <p className="text-xs uppercase tracking-wider text-[#78716C] font-semibold">
+          <div className="p-5 rounded-2xl bg-[#FAF8F5] border border-[#EAE5DF] text-center">
+            <p className="text-[11px] uppercase tracking-wider text-[#6E6A63] font-semibold">
               Personal Invitation For
             </p>
-            <h2 className="text-xl font-black text-[#1C1917] mt-0.5">
+            <h2 className="font-serif text-2xl font-bold text-[#1F1E1C] mt-1">
               Namaste, {data.guest.name}! 🙏
             </h2>
-            <p className="text-xs text-[#78716C] mt-1.5 max-w-md mx-auto leading-relaxed">
-              We would be honored by your presence and blessings. Please confirm your attendance below so we can arrange comfortable hospitality and meals for you.
+            <p className="text-xs text-[#6E6A63] mt-2 max-w-md mx-auto leading-relaxed">
+              We would be truly honored by your presence and warm blessings. Please let us know if you can attend so we can arrange comfortable hospitality and fresh meals for you.
             </p>
           </div>
         </div>
 
         {/* Success Confirmation Banner if already submitted */}
         {submitted && (
-          <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-300 text-center animate-fade-in">
-            <PartyPopper className="w-10 h-10 text-emerald-600 mx-auto mb-2" />
-            <h3 className="text-lg font-bold text-emerald-900">
-              Shukriya! Your RSVP is Confirmed 🎊
+          <div className="p-6 rounded-2xl bg-[#F2F5F0] border border-[#7A8B74]/30 text-center animate-fade-in shadow-sm">
+            <PartyPopper className="w-10 h-10 text-[#7A8B74] mx-auto mb-2" />
+            <h3 className="font-serif text-xl font-bold text-[#1F1E1C]">
+              Shukriya! Your Response is Confirmed 🎊
             </h3>
-            <p className="text-xs text-emerald-700 mt-1">
-              Your attendance and food preferences have been saved. You can return to this link anytime to update your plans if anything changes.
+            <p className="text-xs text-[#6E6A63] mt-1.5 leading-relaxed">
+              Your attendance and dietary preferences have been saved. You can reopen this link anytime to update your plans if anything changes.
             </p>
           </div>
         )}
@@ -305,11 +304,11 @@ function GuestRsvpInner() {
         {/* RSVP Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-[#78716C] px-1">
+            <h3 className="font-serif text-lg font-bold text-[#1F1E1C] px-1">
               Confirm For Each Ceremony
             </h3>
 
-            {data.events.map((event) => {
+            {sortEventsChronologically(data.events).map((event) => {
               const current = rsvpState[event.id] || {
                 status: "CONFIRMED",
                 partySize: 1,
@@ -324,45 +323,46 @@ function GuestRsvpInner() {
               return (
                 <Card
                   key={event.id}
-                  className={`border transition-all shadow-sm ${
+                  className={`border transition-all shadow-[0_2px_12px_-2px_rgba(0,0,0,0.03)] rounded-2xl ${
                     current.status === "CONFIRMED"
-                      ? "border-emerald-300 bg-white"
+                      ? "border-[#7A8B74]/40 bg-white"
                       : current.status === "DECLINED"
-                      ? "border-red-200 bg-stone-50/50"
-                      : "border-[#E8DDD3] bg-white"
+                      ? "border-rose-200 bg-stone-50/50"
+                      : "border-[#EAE5DF] bg-white"
                   }`}
                 >
-                  <CardHeader className="pb-3">
+                  <CardHeader className="pb-3 p-6">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <Badge className="bg-[#FFFBF5] text-[#D97706] border border-[#E8DDD3] text-[10px] font-bold mb-1">
+                        <Badge variant="default" className="text-[10px] font-semibold uppercase tracking-wider mb-2">
                           {event.type}
                         </Badge>
-                        <CardTitle className="text-lg font-bold text-[#1C1917]">
+                        <CardTitle className="font-serif text-xl font-bold text-[#1F1E1C]">
                           {event.name}
                         </CardTitle>
-                        <CardDescription className="text-xs text-[#78716C] mt-0.5">
-                          📅 {formatDate(event.eventDate)} {event.startTime && `• ⏰ ${event.startTime}`}
-                          {event.venue && ` • 📍 ${event.venue}`}
+                        <CardDescription className="text-xs text-[#6E6A63] mt-1 flex flex-wrap items-center gap-2">
+                          <span>📅 <span className="tabular-nums">{formatDate(event.eventDate)}</span></span>
+                          {event.startTime && <span>• ⏰ {event.startTime}</span>}
+                          {event.venue && <span>• 📍 {event.venue}</span>}
                         </CardDescription>
                       </div>
                     </div>
                   </CardHeader>
 
-                  <CardContent className="space-y-4 pt-1">
+                  <CardContent className="space-y-4 px-6 pb-6 pt-1">
                     {/* Status Toggle Buttons */}
                     <div>
-                      <Label className="text-xs font-semibold text-[#78716C] block mb-2">
+                      <Label className="text-xs font-semibold text-[#6E6A63] block mb-2">
                         Are you attending this ceremony?
                       </Label>
                       <div className="grid grid-cols-3 gap-2">
                         <button
                           type="button"
                           onClick={() => updateEventRsvp(event.id, { status: "CONFIRMED" })}
-                          className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
+                          className={`py-2.5 px-3 rounded-[10px] text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
                             current.status === "CONFIRMED"
-                              ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
-                              : "bg-white text-[#1C1917] border-[#E8DDD3] hover:bg-emerald-50"
+                              ? "bg-[#7A8B74] text-white border-[#7A8B74] shadow-sm"
+                              : "bg-white text-[#1F1E1C] border-[#EAE5DF] hover:bg-[#F2F5F0]"
                           }`}
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
@@ -372,10 +372,10 @@ function GuestRsvpInner() {
                         <button
                           type="button"
                           onClick={() => updateEventRsvp(event.id, { status: "MAYBE" })}
-                          className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
+                          className={`py-2.5 px-3 rounded-[10px] text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
                             current.status === "MAYBE"
-                              ? "bg-[#D97706] text-white border-[#D97706] shadow-sm"
-                              : "bg-white text-[#1C1917] border-[#E8DDD3] hover:bg-amber-50"
+                              ? "bg-[#C5A059] text-white border-[#C5A059] shadow-sm"
+                              : "bg-white text-[#1F1E1C] border-[#EAE5DF] hover:bg-[#FBF8F1]"
                           }`}
                         >
                           <HelpCircle className="w-3.5 h-3.5" />
@@ -385,10 +385,10 @@ function GuestRsvpInner() {
                         <button
                           type="button"
                           onClick={() => updateEventRsvp(event.id, { status: "DECLINED" })}
-                          className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
+                          className={`py-2.5 px-3 rounded-[10px] text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
                             current.status === "DECLINED"
-                              ? "bg-red-600 text-white border-red-600 shadow-sm"
-                              : "bg-white text-[#1C1917] border-[#E8DDD3] hover:bg-red-50"
+                              ? "bg-rose-600 text-white border-rose-600 shadow-sm"
+                              : "bg-white text-[#1F1E1C] border-[#EAE5DF] hover:bg-rose-50"
                           }`}
                         >
                           <XCircle className="w-3.5 h-3.5" />
@@ -399,14 +399,14 @@ function GuestRsvpInner() {
 
                     {/* Attending Details: Party Size, Food Breakdown, Arrival Time */}
                     {current.status === "CONFIRMED" && (
-                      <div className="space-y-4 pt-3 border-t border-[#E8DDD3] animate-fade-in">
+                      <div className="space-y-4 pt-3 border-t border-[#EAE5DF] animate-fade-in">
                         {/* Party Size Selector */}
                         <div>
                           <div className="flex items-center justify-between mb-2">
-                            <Label className="text-xs font-semibold text-[#1C1917]">
+                            <Label className="text-xs font-semibold text-[#1F1E1C]">
                               Total People Attending (including you)
                             </Label>
-                            <span className="text-xs font-bold text-[#B91C6C]">
+                            <span className="text-xs font-bold text-[#C5A059] tabular-nums">
                               {current.partySize} {current.partySize === 1 ? "Person" : "People"}
                             </span>
                           </div>
@@ -416,10 +416,10 @@ function GuestRsvpInner() {
                                 key={num}
                                 type="button"
                                 onClick={() => handlePartySizeChange(event.id, num)}
-                                className={`w-9 h-9 rounded-lg font-bold text-xs border transition-all cursor-pointer ${
+                                className={`w-9 h-9 rounded-[10px] font-semibold text-xs border transition-all cursor-pointer ${
                                   current.partySize === num
-                                    ? "bg-[#B91C6C] text-white border-[#B91C6C]"
-                                    : "bg-white text-[#78716C] border-[#E8DDD3] hover:bg-[#FFFBF5]"
+                                    ? "bg-[#1F2E23] text-white border-[#1F2E23]"
+                                    : "bg-white text-[#6E6A63] border-[#EAE5DF] hover:bg-[#FAF8F5]"
                                 }`}
                               >
                                 {num}
@@ -429,34 +429,34 @@ function GuestRsvpInner() {
                         </div>
 
                         {/* Food Preferences Breakdown */}
-                        <div className="p-3.5 rounded-xl bg-[#FFFBF5] border border-[#E8DDD3] space-y-3">
+                        <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#EAE5DF] space-y-3">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-[#1C1917] flex items-center gap-1.5">
-                              <UtensilsCrossed className="w-3.5 h-3.5 text-[#B91C6C]" />
+                            <span className="text-xs font-semibold text-[#1F1E1C] flex items-center gap-1.5">
+                              <UtensilsCrossed className="w-3.5 h-3.5 text-[#C5A059]" />
                               Food &amp; Dietary Requirements
                             </span>
-                            <span className="text-[10px] text-[#78716C]">
+                            <span className="text-[10px] text-[#6E6A63] tabular-nums">
                               Total: {current.vegCount + current.jainCount + current.nonVegCount + current.veganCount} / {current.partySize} plates
                             </span>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="grid grid-cols-2 gap-2.5 text-xs">
                             {/* Veg */}
-                            <div className="p-2 bg-white rounded-lg border border-[#E8DDD3] flex items-center justify-between">
-                              <span className="font-medium text-emerald-800">🥗 Vegetarian</span>
+                            <div className="p-2.5 bg-white rounded-lg border border-[#EAE5DF] flex items-center justify-between">
+                              <span className="font-medium text-[#7A8B74]">🥗 Vegetarian</span>
                               <div className="flex items-center gap-1.5">
                                 <button
                                   type="button"
                                   onClick={() => updateEventRsvp(event.id, { vegCount: Math.max(0, current.vegCount - 1) })}
-                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold"
+                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold hover:bg-stone-200"
                                 >
                                   -
                                 </button>
-                                <span className="font-bold w-4 text-center">{current.vegCount}</span>
+                                <span className="font-bold w-4 text-center tabular-nums">{current.vegCount}</span>
                                 <button
                                   type="button"
                                   onClick={() => updateEventRsvp(event.id, { vegCount: current.vegCount + 1 })}
-                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold"
+                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold hover:bg-stone-200"
                                 >
                                   +
                                 </button>
@@ -464,21 +464,21 @@ function GuestRsvpInner() {
                             </div>
 
                             {/* Jain */}
-                            <div className="p-2 bg-white rounded-lg border border-[#E8DDD3] flex items-center justify-between">
-                              <span className="font-medium text-amber-800">🪷 Pure Jain</span>
+                            <div className="p-2.5 bg-white rounded-lg border border-[#EAE5DF] flex items-center justify-between">
+                              <span className="font-medium text-[#C5A059]">🪷 Pure Jain</span>
                               <div className="flex items-center gap-1.5">
                                 <button
                                   type="button"
                                   onClick={() => updateEventRsvp(event.id, { jainCount: Math.max(0, current.jainCount - 1) })}
-                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold"
+                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold hover:bg-stone-200"
                                 >
                                   -
                                 </button>
-                                <span className="font-bold w-4 text-center">{current.jainCount}</span>
+                                <span className="font-bold w-4 text-center tabular-nums">{current.jainCount}</span>
                                 <button
                                   type="button"
                                   onClick={() => updateEventRsvp(event.id, { jainCount: current.jainCount + 1 })}
-                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold"
+                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold hover:bg-stone-200"
                                 >
                                   +
                                 </button>
@@ -486,21 +486,21 @@ function GuestRsvpInner() {
                             </div>
 
                             {/* Non-Veg */}
-                            <div className="p-2 bg-white rounded-lg border border-[#E8DDD3] flex items-center justify-between">
-                              <span className="font-medium text-red-800">🍗 Non-Veg</span>
+                            <div className="p-2.5 bg-white rounded-lg border border-[#EAE5DF] flex items-center justify-between">
+                              <span className="font-medium text-rose-700">🍗 Non-Veg</span>
                               <div className="flex items-center gap-1.5">
                                 <button
                                   type="button"
                                   onClick={() => updateEventRsvp(event.id, { nonVegCount: Math.max(0, current.nonVegCount - 1) })}
-                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold"
+                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold hover:bg-stone-200"
                                 >
                                   -
                                 </button>
-                                <span className="font-bold w-4 text-center">{current.nonVegCount}</span>
+                                <span className="font-bold w-4 text-center tabular-nums">{current.nonVegCount}</span>
                                 <button
                                   type="button"
                                   onClick={() => updateEventRsvp(event.id, { nonVegCount: current.nonVegCount + 1 })}
-                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold"
+                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold hover:bg-stone-200"
                                 >
                                   +
                                 </button>
@@ -508,21 +508,21 @@ function GuestRsvpInner() {
                             </div>
 
                             {/* Vegan */}
-                            <div className="p-2 bg-white rounded-lg border border-[#E8DDD3] flex items-center justify-between">
-                              <span className="font-medium text-purple-800">🌱 Vegan</span>
+                            <div className="p-2.5 bg-white rounded-lg border border-[#EAE5DF] flex items-center justify-between">
+                              <span className="font-medium text-[#6E6A63]">🌱 Vegan</span>
                               <div className="flex items-center gap-1.5">
                                 <button
                                   type="button"
                                   onClick={() => updateEventRsvp(event.id, { veganCount: Math.max(0, current.veganCount - 1) })}
-                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold"
+                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold hover:bg-stone-200"
                                 >
                                   -
                                 </button>
-                                <span className="font-bold w-4 text-center">{current.veganCount}</span>
+                                <span className="font-bold w-4 text-center tabular-nums">{current.veganCount}</span>
                                 <button
                                   type="button"
                                   onClick={() => updateEventRsvp(event.id, { veganCount: current.veganCount + 1 })}
-                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold"
+                                  className="w-5 h-5 rounded bg-stone-100 text-stone-700 font-bold hover:bg-stone-200"
                                 >
                                   +
                                 </button>
@@ -533,7 +533,7 @@ function GuestRsvpInner() {
 
                         {/* Arrival Time */}
                         <div>
-                          <Label className="text-xs font-semibold text-[#78716C] block mb-1.5">
+                          <Label className="text-xs font-semibold text-[#6E6A63] block mb-1.5">
                             Estimated Arrival Time
                           </Label>
                           <select
@@ -543,7 +543,7 @@ function GuestRsvpInner() {
                                 arrivalTime: e.target.value as (typeof current)["arrivalTime"],
                               })
                             }
-                            className="w-full h-9 rounded-lg border border-[#E8DDD3] bg-white px-3 text-xs text-[#1C1917] outline-none"
+                            className="w-full h-10 rounded-[10px] border border-[#EAE5DF] bg-white px-3 text-xs text-[#1F1E1C] outline-none focus:border-[#C5A059]"
                           >
                             <option value="BEFORE_EVENT">Early arrival (Will help with setup / pre-ceremony)</option>
                             <option value="ON_TIME">Right on time for the Muhurat / Event start</option>
@@ -554,14 +554,14 @@ function GuestRsvpInner() {
 
                         {/* Special Dietary / Wishes Notes */}
                         <div>
-                          <Label className="text-xs font-semibold text-[#78716C] block mb-1">
+                          <Label className="text-xs font-semibold text-[#6E6A63] block mb-1">
                             Dietary Allergies or Special Requests
                           </Label>
                           <Input
                             placeholder="e.g. No gluten / strictly no garlic for Dadi / high chair for baby"
                             value={current.dietaryNotes}
                             onChange={(e) => updateEventRsvp(event.id, { dietaryNotes: e.target.value })}
-                            className="h-9 text-xs border-[#E8DDD3]"
+                            className="h-10 text-xs border-[#EAE5DF]"
                           />
                         </div>
                       </div>
@@ -576,14 +576,14 @@ function GuestRsvpInner() {
           <Button
             type="submit"
             disabled={submitting}
-            className="w-full h-12 bg-[#B91C6C] hover:bg-[#9D174D] text-white font-bold text-base shadow-xl shadow-[#B91C6C]/25 cursor-pointer"
+            className="w-full h-12 bg-[#1F2E23] hover:bg-[#152018] text-[#C5A059] border border-[#C5A059]/40 font-medium text-base shadow-lg shadow-[#1F2E23]/20 cursor-pointer"
           >
-            {submitting ? "Submitting RSVP..." : "Save My RSVP Confirmation"}
-            {!submitting && <Send className="w-4 h-4 ml-2" />}
+            {submitting ? "Saving Your Response..." : "Confirm Attendance & Food Preferences"}
+            {!submitting && <Send className="w-4 h-4 ml-2 text-[#C5A059]" />}
           </Button>
 
-          <p className="text-center text-xs text-[#78716C]">
-            You can bookmark or reopen this WhatsApp link anytime to adjust your RSVP.
+          <p className="text-center text-xs text-[#6E6A63]">
+            You can reopen this WhatsApp link anytime if your plans or food choices change.
           </p>
         </form>
       </div>
@@ -595,12 +595,12 @@ export default function GuestRsvpPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="min-h-screen bg-[#FFFBF5] flex items-center justify-center p-4">
+        <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center p-4">
           <div className="text-center space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#B91C6C] text-white flex items-center justify-center mx-auto animate-pulse">
-              <Heart className="w-6 h-6 fill-white" />
+            <div className="w-12 h-12 rounded-2xl bg-[#1F2E23] text-[#C5A059] flex items-center justify-center mx-auto animate-pulse">
+              <Heart className="w-6 h-6 fill-[#C5A059]" />
             </div>
-            <p className="text-sm font-semibold text-[#78716C]">Opening Wedding Invitation...</p>
+            <p className="text-sm font-semibold text-[#6E6A63]">Opening Wedding Invitation...</p>
           </div>
         </div>
       }

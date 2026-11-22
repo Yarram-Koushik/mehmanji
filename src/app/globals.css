@@ -1,39 +1,76 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #B91C6C;
-  --color-primary-hover: #9D174D;
-  --color-primary-light: #FCE7F3;
-  --color-secondary: #D97706;
-  --color-secondary-hover: #B45309;
-  --color-secondary-light: #FEF3C7;
-  --color-surface: #FFFBF5;
-  --color-surface-card: #FFFFFF;
-  --color-surface-muted: #F8F4EE;
-  --color-border-custom: #EADDD0;
-  --color-wedding-gold: #C59B27;
+  --font-serif: var(--font-serif), "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --font-sans: var(--font-sans), "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --color-alabaster: #FAF8F5;
+  --color-card: #FFFFFF;
+  --color-card-border: #EAE5DF;
+  --color-charcoal: #1F1E1C;
+  --color-warm-gray: #6E6A63;
+  --color-champagne: #C5A059;
+  --color-champagne-hover: #B08D47;
+  --color-champagne-light: #FBF8F1;
+  --color-champagne-subtle: #F5EEDB;
+  --color-sage: #7A8B74;
+  --color-sage-hover: #677761;
+  --color-sage-light: #F2F5F0;
+  --color-forest: #1F2E23;
+  --color-forest-dark: #152018;
+  --color-forest-light: #2A3C2F;
+
+  --color-primary: #C5A059;
+  --color-primary-hover: #B08D47;
+  --color-primary-light: #FBF8F1;
+  --color-secondary: #7A8B74;
 }
 
 :root {
-  --primary: #B91C6C;
-  --primary-foreground: #FFFFFF;
-  --secondary: #D97706;
-  --secondary-foreground: #FFFFFF;
-  --background: #FFFBF5;
-  --foreground: #1C1917;
+  --background: #FAF8F5;
+  --foreground: #1F1E1C;
   --card: #FFFFFF;
-  --card-foreground: #1C1917;
-  --muted: #F5EFEB;
-  --muted-foreground: #78716C;
-  --border: #E8DDD3;
-  --ring: #B91C6C;
+  --card-foreground: #1F1E1C;
+  --border: #EAE5DF;
+  --muted: #F5F1EB;
+  --muted-foreground: #6E6A63;
+  --primary: #C5A059;
+  --primary-foreground: #FFFFFF;
+  --ring: #C5A059;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   min-height: 100vh;
+}
+
+.font-serif {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom subtle luxury scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #EAE5DF;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C5A059;
 }
 
 /* Shimmer animation for skeletons */

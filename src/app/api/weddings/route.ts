@@ -17,7 +17,7 @@ export async function GET() {
       },
       include: {
         events: {
-          orderBy: { sortOrder: "asc" },
+          orderBy: [{ eventDate: "asc" }, { sortOrder: "asc" }],
         },
         _count: {
           select: {
@@ -53,7 +53,48 @@ export async function POST(request: Request) {
       );
     }
 
-    const { brideName, groomName, familyName, weddingDate, venue, city, themeColor } = parsed.data;
+    const { brideName, groomName, familyName, weddingDate, venue, city, themeColor, includeDefaultFunctions } = parsed.data;
+
+    const defaultEvents = includeDefaultFunctions !== false
+      ? [
+          {
+            name: "Mehendi & Haldi",
+            type: "MEHENDI",
+            eventDate: new Date(weddingDate),
+            startTime: "3:00 PM",
+            endTime: "7:00 PM",
+            venue: venue,
+            sortOrder: 1,
+          },
+          {
+            name: "Sangeet Night",
+            type: "SANGEET",
+            eventDate: new Date(weddingDate),
+            startTime: "7:30 PM",
+            endTime: "11:30 PM",
+            venue: venue,
+            sortOrder: 2,
+          },
+          {
+            name: "Wedding Ceremony (Pheras)",
+            type: "WEDDING",
+            eventDate: new Date(weddingDate),
+            startTime: "6:00 PM",
+            endTime: "10:00 PM",
+            venue: venue,
+            sortOrder: 3,
+          },
+          {
+            name: "Reception",
+            type: "RECEPTION",
+            eventDate: new Date(weddingDate),
+            startTime: "8:00 PM",
+            endTime: "11:30 PM",
+            venue: venue,
+            sortOrder: 4,
+          },
+        ]
+      : [];
 
     const wedding = await prisma.wedding.create({
       data: {
@@ -64,52 +105,14 @@ export async function POST(request: Request) {
         weddingDate: new Date(weddingDate),
         venue,
         city,
-        themeColor: themeColor || "#B91C6C",
-        // Default default 4 sub-events for Indian weddings
+        themeColor: themeColor || "#C5A059",
         events: {
-          create: [
-            {
-              name: "Mehendi & Haldi",
-              type: "MEHENDI",
-              eventDate: new Date(weddingDate),
-              startTime: "3:00 PM",
-              endTime: "7:00 PM",
-              venue: venue,
-              sortOrder: 1,
-            },
-            {
-              name: "Sangeet Night",
-              type: "SANGEET",
-              eventDate: new Date(weddingDate),
-              startTime: "7:30 PM",
-              endTime: "11:30 PM",
-              venue: venue,
-              sortOrder: 2,
-            },
-            {
-              name: "Wedding Ceremony (Pheras)",
-              type: "WEDDING",
-              eventDate: new Date(weddingDate),
-              startTime: "6:00 PM",
-              endTime: "10:00 PM",
-              venue: venue,
-              sortOrder: 3,
-            },
-            {
-              name: "Reception",
-              type: "RECEPTION",
-              eventDate: new Date(weddingDate),
-              startTime: "8:00 PM",
-              endTime: "11:30 PM",
-              venue: venue,
-              sortOrder: 4,
-            },
-          ],
+          create: defaultEvents,
         },
         guestGroups: {
           create: [
-            { name: "Family & Relatives", color: "#B91C6C" },
-            { name: "Friends", color: "#D97706" },
+            { name: "Family & Relatives", color: "#C5A059" },
+            { name: "Friends", color: "#7A8B74" },
             { name: "Colleagues", color: "#2563EB" },
           ],
         },

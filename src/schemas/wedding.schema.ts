@@ -27,7 +27,8 @@ export const createWeddingSchema = z.object({
     .min(2, "City must be at least 2 characters")
     .max(100)
     .trim(),
-  themeColor: z.string().default("#B91C6C"),
+  themeColor: z.string().default("#C5A059"),
+  includeDefaultFunctions: z.boolean().default(true).optional(),
 });
 
 export const updateWeddingSchema = createWeddingSchema.partial();

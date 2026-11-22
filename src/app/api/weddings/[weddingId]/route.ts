@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { updateWeddingSchema } from "@/schemas/wedding.schema";
+import { sortEventsChronologically } from "@/lib/utils";
 
 interface RouteParams {
   params: Promise<{ weddingId: string }>;
@@ -20,7 +21,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       where: { id: weddingId },
       include: {
         events: {
-          orderBy: { sortOrder: "asc" },
+          orderBy: [{ eventDate: "asc" }, { sortOrder: "asc" }],
         },
         guestGroups: true,
         guests: {
@@ -74,6 +75,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({
       ...wedding,
+      events: sortEventsChronologically(wedding.events),
       stats: {
         totalGuests: wedding.guests.length,
         totalConfirmed,

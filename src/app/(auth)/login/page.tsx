@@ -63,32 +63,32 @@ export default function LoginPage() {
     <div className="w-full">
       {/* Brand Header */}
       <div className="mb-8 text-center">
-        <Link href="/" className="inline-flex items-center gap-2 mb-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#B91C6C] to-[#D97706] flex items-center justify-center text-white shadow-md shadow-[#B91C6C]/20 group-hover:scale-105 transition-transform">
+        <Link href="/" className="inline-flex items-center gap-2.5 mb-3 group">
+          <div className="w-10 h-10 rounded-xl bg-[#1F2E23] border border-[#C5A059]/40 flex items-center justify-center text-[#C5A059] shadow-sm group-hover:scale-105 transition-transform">
             <UtensilsCrossed className="w-5 h-5" />
           </div>
-          <span className="text-2xl font-black tracking-tight text-[#1C1917]">
-            Mehman<span className="text-[#B91C6C]">Ji</span>
+          <span className="font-serif text-3xl font-bold tracking-tight text-[#1F1E1C]">
+            Mehman<span className="text-[#C5A059]">Ji</span>
           </span>
         </Link>
-        <p className="text-sm text-[#78716C]">
+        <p className="text-xs uppercase tracking-widest text-[#6E6A63] font-semibold">
           The Indian Wedding Guest Intelligence Platform
         </p>
       </div>
 
-      <Card className="border-[#E8DDD3] shadow-lg shadow-stone-200/50 bg-white">
-        <CardHeader className="space-y-1 pb-4">
-          <CardTitle className="text-xl font-bold tracking-tight text-[#1C1917]">
+      <Card className="border-[#EAE5DF] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.05)] bg-white rounded-2xl">
+        <CardHeader className="space-y-1 p-6 pb-4">
+          <CardTitle className="font-serif text-2xl font-bold tracking-tight text-[#1F1E1C]">
             Sign in to your account
           </CardTitle>
-          <CardDescription className="text-xs text-[#78716C]">
-            Track RSVPs, manage catering headcount, and message guests.
+          <CardDescription className="text-xs text-[#6E6A63] pt-0.5">
+            Track guest attendance, calculate Halwai food plates, and send WhatsApp invites.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-[#78716C]">
+          <CardContent className="space-y-4 px-6 pb-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-[#6E6A63]">
                 Email Address
               </Label>
               <Input
@@ -98,12 +98,12 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-11 border-[#E8DDD3] focus:border-[#B91C6C]"
+                className="h-10 border-[#EAE5DF] focus:border-[#C5A059]"
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-[#78716C]">
+                <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-[#6E6A63]">
                   Password
                 </Label>
               </div>
@@ -114,49 +114,44 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-11 border-[#E8DDD3] focus:border-[#B91C6C]"
+                className="h-10 border-[#EAE5DF] focus:border-[#C5A059]"
               />
             </div>
 
             {/* Quick Demo Fill button */}
-            <div className="p-3 bg-[#FFFBF5] rounded-lg border border-[#E8DDD3]/80 flex items-center justify-between">
+            <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#EAE5DF] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#D97706]" />
-                <span className="text-xs font-medium text-[#1C1917]">Sample Demo Account</span>
+                <Sparkles className="w-4 h-4 text-[#C5A059]" />
+                <span className="text-xs font-medium text-[#1F1E1C]">Sample Demo Account</span>
               </div>
               <button
                 type="button"
                 onClick={handleDemoLogin}
-                className="text-xs font-bold text-[#B91C6C] hover:underline cursor-pointer"
+                className="text-xs font-semibold text-[#C5A059] hover:underline cursor-pointer"
               >
                 Auto-fill
               </button>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-3 pt-2">
+          <CardFooter className="flex flex-col gap-3 p-6 pt-2">
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 bg-[#B91C6C] hover:bg-[#9D174D] text-white font-semibold text-sm shadow-md shadow-[#B91C6C]/20 cursor-pointer"
+              className="w-full h-11 bg-[#1F2E23] hover:bg-[#152018] text-[#C5A059] border border-[#C5A059]/40 font-medium text-sm shadow-md cursor-pointer"
             >
               {loading ? "Signing in..." : "Sign in to MehmanJi"}
-              {!loading && <ArrowRight className="w-4 h-4 ml-2" />}
+              {!loading && <ArrowRight className="w-4 h-4 ml-2 text-[#C5A059]" />}
             </Button>
 
-            <div className="text-center text-xs text-[#78716C] pt-2">
+            <div className="text-center text-xs text-[#6E6A63] pt-2">
               Don&apos;t have an account?{" "}
-              <Link href="/signup" className="font-bold text-[#B91C6C] hover:underline">
+              <Link href="/signup" className="font-semibold text-[#C5A059] hover:underline">
                 Create wedding account
               </Link>
             </div>
           </CardFooter>
         </form>
       </Card>
-
-      <div className="mt-6 flex items-center justify-center gap-2 text-xs text-[#78716C]">
-        <ShieldCheck className="w-4 h-4 text-emerald-600" />
-        <span>End-to-end encrypted guest privacy</span>
-      </div>
     </div>
   );
 }

@@ -5,21 +5,22 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-pink-700 focus:ring-offset-2",
+  "inline-flex items-center rounded-full border px-3 py-0.5 text-xs font-semibold tracking-wide transition-colors focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:ring-offset-2",
   {
     variants: {
       variant: {
         default:
-          "border-transparent bg-pink-700 text-white",
+          "border-[#C5A059]/30 bg-[#FBF8F1] text-[#C5A059]",
         secondary:
-          "border-transparent bg-amber-600 text-white",
-        outline: "border-pink-700 text-pink-700",
+          "border-[#EAE5DF] bg-[#FAF8F5] text-[#6E6A63]",
+        outline:
+          "border-[#EAE5DF] text-[#1F1E1C]",
         success:
-          "border-transparent bg-green-600 text-white",
+          "border-[#7A8B74]/30 bg-[#F2F5F0] text-[#7A8B74]",
         warning:
-          "border-transparent bg-yellow-500 text-white",
+          "border-amber-200 bg-amber-50 text-amber-700",
         danger:
-          "border-transparent bg-red-600 text-white",
+          "border-rose-200 bg-rose-50 text-rose-700",
       },
     },
     defaultVariants: {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createEventSchema } from "@/schemas/event.schema";
+import { sortEventsChronologically } from "@/lib/utils";
 
 interface RouteParams {
   params: Promise<{ weddingId: string }>;
@@ -26,10 +27,10 @@ export async function GET(request: Request, { params }: RouteParams) {
       include: {
         rsvps: true,
       },
-      orderBy: { sortOrder: "asc" },
+      orderBy: [{ eventDate: "asc" }, { sortOrder: "asc" }],
     });
 
-    return NextResponse.json(events);
+    return NextResponse.json(sortEventsChronologically(events));
   } catch (error) {
     console.error("Fetch events error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

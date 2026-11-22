@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { submitRsvpSchema } from "@/schemas/rsvp.schema";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { sortEventsChronologically } from "@/lib/utils";
 
 interface RouteParams {
   params: Promise<{ token: string }>;
@@ -32,7 +33,7 @@ export async function GET(request: Request, { params }: RouteParams) {
             themeColor: true,
             coverImageUrl: true,
             events: {
-              orderBy: { sortOrder: "asc" },
+              orderBy: [{ eventDate: "asc" }, { sortOrder: "asc" }],
             },
           },
         },
@@ -45,6 +46,8 @@ export async function GET(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "Invalid invitation link" }, { status: 404 });
     }
 
+    const sortedEvents = sortEventsChronologically(guest.wedding.events);
+
     return NextResponse.json({
       guest: {
         id: guest.id,
@@ -53,8 +56,11 @@ export async function GET(request: Request, { params }: RouteParams) {
         email: guest.email,
         token: guest.token,
       },
-      wedding: guest.wedding,
-      events: guest.wedding.events,
+      wedding: {
+        ...guest.wedding,
+        events: sortedEvents,
+      },
+      events: sortedEvents,
       existingRsvps: guest.rsvps,
     });
   } catch (error) {

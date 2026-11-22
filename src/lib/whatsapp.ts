@@ -23,12 +23,17 @@ export function createBulkShareMessage(
   wedding: Wedding,
   rsvpBaseUrl: string
 ): string {
-  return `🎊 You are invited to the ${wedding.familyName}!
+  const weddingTitle = wedding.familyName.trim().toLowerCase().startsWith("the ")
+    ? wedding.familyName.trim()
+    : `the ${wedding.familyName.trim()}`;
 
-📅 Date: ${formatDate(wedding.weddingDate)}
-📍 Venue: ${wedding.venue}, ${wedding.city}
+  return `Namaste! 🙏 You are cordially invited to ${weddingTitle}! ✨
 
-Please RSVP at: ${rsvpBaseUrl}
+• Date: ${formatDate(wedding.weddingDate)}
+• Venue: ${wedding.venue}, ${wedding.city}
 
-We look forward to celebrating with you! 🎉`;
+Please confirm your attendance here:
+${rsvpBaseUrl}
+
+Looking forward to celebrating with you! 🎊`;
 }

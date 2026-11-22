@@ -50,7 +50,6 @@ export default function SignupPage() {
         description: "Signing you in to your dashboard...",
       });
 
-      // Automatically sign in
       const loginRes = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
@@ -76,32 +75,32 @@ export default function SignupPage() {
   return (
     <div className="w-full">
       <div className="mb-8 text-center">
-        <Link href="/" className="inline-flex items-center gap-2 mb-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#B91C6C] to-[#D97706] flex items-center justify-center text-white shadow-md shadow-[#B91C6C]/20 group-hover:scale-105 transition-transform">
+        <Link href="/" className="inline-flex items-center gap-2.5 mb-3 group">
+          <div className="w-10 h-10 rounded-xl bg-[#1F2E23] border border-[#C5A059]/40 flex items-center justify-center text-[#C5A059] shadow-sm group-hover:scale-105 transition-transform">
             <UtensilsCrossed className="w-5 h-5" />
           </div>
-          <span className="text-2xl font-black tracking-tight text-[#1C1917]">
-            Mehman<span className="text-[#B91C6C]">Ji</span>
+          <span className="font-serif text-3xl font-bold tracking-tight text-[#1F1E1C]">
+            Mehman<span className="text-[#C5A059]">Ji</span>
           </span>
         </Link>
-        <p className="text-sm text-[#78716C]">
+        <p className="text-xs uppercase tracking-widest text-[#6E6A63] font-semibold">
           Save ₹2-5 Lakhs on Indian wedding catering waste
         </p>
       </div>
 
-      <Card className="border-[#E8DDD3] shadow-lg shadow-stone-200/50 bg-white">
-        <CardHeader className="space-y-1 pb-4">
-          <CardTitle className="text-xl font-bold tracking-tight text-[#1C1917]">
+      <Card className="border-[#EAE5DF] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.05)] bg-white rounded-2xl">
+        <CardHeader className="space-y-1 p-6 pb-4">
+          <CardTitle className="font-serif text-2xl font-bold tracking-tight text-[#1F1E1C]">
             Create wedding planner account
           </CardTitle>
-          <CardDescription className="text-xs text-[#78716C]">
-            Setup your guest list, events, and WhatsApp invitation links in minutes.
+          <CardDescription className="text-xs text-[#6E6A63] pt-0.5">
+            Setup your guest list, ceremonies, and WhatsApp invitation links in minutes.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-3.5">
+          <CardContent className="space-y-3.5 px-6 pb-4">
             <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-xs font-semibold uppercase tracking-wider text-[#78716C]">
+              <Label htmlFor="name" className="text-xs font-semibold uppercase tracking-wider text-[#6E6A63]">
                 Your Full Name
               </Label>
               <Input
@@ -110,11 +109,11 @@ export default function SignupPage() {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="h-10 border-[#E8DDD3] focus:border-[#B91C6C]"
+                className="h-10 border-[#EAE5DF] focus:border-[#C5A059]"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-[#78716C]">
+              <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-[#6E6A63]">
                 Email Address
               </Label>
               <Input
@@ -124,11 +123,11 @@ export default function SignupPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className="h-10 border-[#E8DDD3] focus:border-[#B91C6C]"
+                className="h-10 border-[#EAE5DF] focus:border-[#C5A059]"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="phone" className="text-xs font-semibold uppercase tracking-wider text-[#78716C]">
+              <Label htmlFor="phone" className="text-xs font-semibold uppercase tracking-wider text-[#6E6A63]">
                 WhatsApp / Phone Number
               </Label>
               <Input
@@ -136,11 +135,11 @@ export default function SignupPage() {
                 placeholder="+91 98765 43210"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="h-10 border-[#E8DDD3] focus:border-[#B91C6C]"
+                className="h-10 border-[#EAE5DF] focus:border-[#C5A059]"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-[#78716C]">
+              <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-[#6E6A63]">
                 Password (min. 8 characters)
               </Label>
               <Input
@@ -151,34 +150,29 @@ export default function SignupPage() {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 minLength={8}
-                className="h-10 border-[#E8DDD3] focus:border-[#B91C6C]"
+                className="h-10 border-[#EAE5DF] focus:border-[#C5A059]"
               />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-3 pt-2">
+          <CardFooter className="flex flex-col gap-3 p-6 pt-2">
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 bg-[#B91C6C] hover:bg-[#9D174D] text-white font-semibold text-sm shadow-md shadow-[#B91C6C]/20 cursor-pointer"
+              className="w-full h-11 bg-[#1F2E23] hover:bg-[#152018] text-[#C5A059] border border-[#C5A059]/40 font-medium text-sm shadow-md cursor-pointer"
             >
-              {loading ? "Creating account..." : "Start Managing Guests Free"}
-              {!loading && <ArrowRight className="w-4 h-4 ml-2" />}
+              {loading ? "Creating Account..." : "Start Managing Your Wedding"}
+              {!loading && <ArrowRight className="w-4 h-4 ml-2 text-[#C5A059]" />}
             </Button>
 
-            <div className="text-center text-xs text-[#78716C] pt-2">
+            <div className="text-center text-xs text-[#6E6A63] pt-2">
               Already have an account?{" "}
-              <Link href="/login" className="font-bold text-[#B91C6C] hover:underline">
-                Sign in
+              <Link href="/login" className="font-semibold text-[#C5A059] hover:underline">
+                Sign In
               </Link>
             </div>
           </CardFooter>
         </form>
       </Card>
-
-      <div className="mt-6 flex items-center justify-center gap-2 text-xs text-[#78716C]">
-        <ShieldCheck className="w-4 h-4 text-emerald-600" />
-        <span>No credit card required. Free tier includes up to 50 guests.</span>
-      </div>
     </div>
   );
 }

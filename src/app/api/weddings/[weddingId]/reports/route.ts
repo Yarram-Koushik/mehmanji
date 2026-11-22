@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sortEventsChronologically } from "@/lib/utils";
 
 interface RouteParams {
   params: Promise<{ weddingId: string }>;
@@ -17,7 +18,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     const wedding = await prisma.wedding.findUnique({
       where: { id: weddingId },
       include: {
-        events: { orderBy: { sortOrder: "asc" } },
+        events: { orderBy: [{ eventDate: "asc" }, { sortOrder: "asc" }] },
         guests: {
           where: { isDeleted: false },
           include: {
@@ -35,9 +36,10 @@ export async function GET(request: Request, { params }: RouteParams) {
     const url = new URL(request.url);
     const selectedEventId = url.searchParams.get("eventId");
 
+    const sortedEvents = sortEventsChronologically(wedding.events);
     const eventsToReport = selectedEventId
-      ? wedding.events.filter((e) => e.id === selectedEventId)
-      : wedding.events;
+      ? sortedEvents.filter((e) => e.id === selectedEventId)
+      : sortedEvents;
 
     const reports = eventsToReport.map((event) => {
       let totalConfirmed = 0;

@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { Plus, CalendarHeart, MapPin, Users, ArrowRight, Sparkles, Trash2 } from "lucide-react";
+import { Plus, CalendarHeart, MapPin, Users, ArrowRight, Sparkles, Trash2, Calendar, Pencil } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
 interface WeddingItem {
@@ -36,6 +37,18 @@ export default function WeddingsPage() {
   const [weddingToDelete, setWeddingToDelete] = React.useState<WeddingItem | null>(null);
   const [deleting, setDeleting] = React.useState(false);
 
+  // Edit Wedding State
+  const [weddingToEdit, setWeddingToEdit] = React.useState<WeddingItem | null>(null);
+  const [editFormData, setEditFormData] = React.useState({
+    brideName: "",
+    groomName: "",
+    familyName: "",
+    weddingDate: "",
+    venue: "",
+    city: "",
+  });
+  const [editing, setEditing] = React.useState(false);
+
   const [formData, setFormData] = React.useState({
     brideName: "",
     groomName: "",
@@ -43,7 +56,8 @@ export default function WeddingsPage() {
     weddingDate: new Date().toISOString().split("T")[0],
     venue: "",
     city: "",
-    themeColor: "#B91C6C",
+    themeColor: "#C5A059",
+    includeDefaultFunctions: true,
   });
 
   const loadWeddings = async () => {
@@ -78,7 +92,9 @@ export default function WeddingsPage() {
       if (res.ok) {
         toast({
           title: "Shaadi Mubarak! 🎊",
-          description: "Wedding created with default Mehendi, Sangeet & Reception events.",
+          description: formData.includeDefaultFunctions
+            ? "Wedding created with default Mehendi, Sangeet & Reception events."
+            : "Wedding created successfully. You can now add custom functions.",
         });
         setOpenModal(false);
         setFormData({
@@ -88,7 +104,8 @@ export default function WeddingsPage() {
           weddingDate: new Date().toISOString().split("T")[0],
           venue: "",
           city: "",
-          themeColor: "#B91C6C",
+          themeColor: "#C5A059",
+          includeDefaultFunctions: true,
         });
         loadWeddings();
       } else {
@@ -102,6 +119,52 @@ export default function WeddingsPage() {
     }
   };
 
+  const handleOpenEdit = (w: WeddingItem) => {
+    setWeddingToEdit(w);
+    const dateStr = w.weddingDate ? new Date(w.weddingDate).toISOString().split("T")[0] : "";
+    setEditFormData({
+      brideName: w.brideName,
+      groomName: w.groomName,
+      familyName: w.familyName,
+      weddingDate: dateStr,
+      venue: w.venue,
+      city: w.city,
+    });
+  };
+
+  const handleUpdateWedding = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!weddingToEdit) return;
+    setEditing(true);
+
+    try {
+      const res = await fetch(`/api/weddings/${weddingToEdit.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editFormData),
+      });
+
+      if (res.ok) {
+        const updated = await res.json();
+        toast({
+          title: "Wedding Details Updated! 🎊",
+          description: `"${editFormData.familyName}" details have been updated.`,
+        });
+        setWeddings((prev) =>
+          prev.map((item) => (item.id === weddingToEdit.id ? { ...item, ...updated } : item))
+        );
+        setWeddingToEdit(null);
+      } else {
+        const err = await res.json();
+        toast({ title: "Update Failed", description: err.error, variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Could not update wedding details", variant: "destructive" });
+    } finally {
+      setEditing(false);
+    }
+  };
+
   const handleDeleteWedding = async () => {
     if (!weddingToDelete) return;
     setDeleting(true);
@@ -111,8 +174,8 @@ export default function WeddingsPage() {
       });
       if (res.ok) {
         toast({
-          title: "Wedding Deleted",
-          description: `"${weddingToDelete.familyName}" has been removed from both client and server.`,
+          title: "Wedding Removed 🗑️",
+          description: `"${weddingToDelete.familyName}" and all guest details have been removed.`,
         });
         setWeddings((prev) => prev.filter((w) => w.id !== weddingToDelete.id));
         setWeddingToDelete(null);
@@ -127,7 +190,6 @@ export default function WeddingsPage() {
     }
   };
 
-  // Auto-generate family name suggestion when bride/groom typed
   const updateBrideOrGroom = (field: "brideName" | "groomName", val: string) => {
     const updated = { ...formData, [field]: val };
     if (!formData.familyName || formData.familyName.includes("&") || formData.familyName.includes("Wedding")) {
@@ -143,38 +205,42 @@ export default function WeddingsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E8DDD3]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EAE5DF]">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[#1C1917]">
+          <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-[#FBF8F1] border border-[#C5A059]/30 text-[#C5A059] text-[11px] font-semibold tracking-wider uppercase mb-1.5">
+            <Sparkles className="w-3 h-3" />
+            Celebration Portfolio
+          </div>
+          <h1 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-[#1F1E1C]">
             Weddings &amp; Celebrations
           </h1>
-          <p className="text-xs sm:text-sm text-[#78716C] mt-1">
-            Manage multiple client weddings or family celebrations in one place.
+          <p className="text-xs sm:text-sm text-[#6E6A63] mt-1">
+            Manage multiple client weddings or family celebrations with precision.
           </p>
         </div>
 
         {/* Create Wedding Dialog */}
         <Dialog open={openModal} onOpenChange={setOpenModal}>
           <DialogTrigger asChild>
-            <Button className="bg-[#B91C6C] hover:bg-[#9D174D] text-white shadow-sm font-semibold text-xs sm:text-sm cursor-pointer">
+            <Button className="bg-[#C5A059] hover:bg-[#B08D47] text-white shadow-sm font-medium text-xs sm:text-sm cursor-pointer h-10 px-4">
               <Plus className="w-4 h-4 mr-1.5" />
               New Wedding
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md bg-white border-[#E8DDD3]">
+          <DialogContent className="max-w-md bg-white border-[#EAE5DF] rounded-2xl p-6">
             <DialogHeader>
-              <DialogTitle className="text-lg font-bold text-[#1C1917]">
+              <DialogTitle className="font-serif text-2xl font-bold text-[#1F1E1C]">
                 Create New Wedding
               </DialogTitle>
-              <DialogDescription className="text-xs text-[#78716C]">
-                We will automatically setup standard Indian sub-events (Mehendi, Sangeet, Pheras, Reception) which you can customize anytime.
+              <DialogDescription className="text-xs text-[#6E6A63] pt-1 leading-relaxed">
+                Enter wedding celebration details and choose whether to include default ceremonies.
               </DialogDescription>
             </DialogHeader>
 
             <form onSubmit={handleCreate} className="space-y-4 pt-2">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="bride" className="text-xs font-semibold text-[#78716C]">
+                  <Label htmlFor="bride" className="text-xs font-semibold text-[#6E6A63]">
                     Bride&apos;s Name
                   </Label>
                   <Input
@@ -183,11 +249,11 @@ export default function WeddingsPage() {
                     value={formData.brideName}
                     onChange={(e) => updateBrideOrGroom("brideName", e.target.value)}
                     required
-                    className="h-9 border-[#E8DDD3]"
+                    className="h-10 border-[#EAE5DF]"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="groom" className="text-xs font-semibold text-[#78716C]">
+                  <Label htmlFor="groom" className="text-xs font-semibold text-[#6E6A63]">
                     Groom&apos;s Name
                   </Label>
                   <Input
@@ -196,13 +262,13 @@ export default function WeddingsPage() {
                     value={formData.groomName}
                     onChange={(e) => updateBrideOrGroom("groomName", e.target.value)}
                     required
-                    className="h-9 border-[#E8DDD3]"
+                    className="h-10 border-[#EAE5DF]"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="family" className="text-xs font-semibold text-[#78716C]">
+                <Label htmlFor="family" className="text-xs font-semibold text-[#6E6A63]">
                   Wedding Title / Family Name
                 </Label>
                 <Input
@@ -211,13 +277,13 @@ export default function WeddingsPage() {
                   value={formData.familyName}
                   onChange={(e) => setFormData({ ...formData, familyName: e.target.value })}
                   required
-                  className="h-9 border-[#E8DDD3]"
+                  className="h-10 border-[#EAE5DF]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="date" className="text-xs font-semibold text-[#78716C]">
+                  <Label htmlFor="date" className="text-xs font-semibold text-[#6E6A63]">
                     Main Wedding Date
                   </Label>
                   <Input
@@ -226,11 +292,11 @@ export default function WeddingsPage() {
                     value={formData.weddingDate}
                     onChange={(e) => setFormData({ ...formData, weddingDate: e.target.value })}
                     required
-                    className="h-9 border-[#E8DDD3]"
+                    className="h-10 border-[#EAE5DF]"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="city" className="text-xs font-semibold text-[#78716C]">
+                  <Label htmlFor="city" className="text-xs font-semibold text-[#6E6A63]">
                     City
                   </Label>
                   <Input
@@ -239,13 +305,13 @@ export default function WeddingsPage() {
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     required
-                    className="h-9 border-[#E8DDD3]"
+                    className="h-10 border-[#EAE5DF]"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="venue" className="text-xs font-semibold text-[#78716C]">
+                <Label htmlFor="venue" className="text-xs font-semibold text-[#6E6A63]">
                   Main Venue Name
                 </Label>
                 <Input
@@ -254,28 +320,44 @@ export default function WeddingsPage() {
                   value={formData.venue}
                   onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
                   required
-                  className="h-9 border-[#E8DDD3]"
+                  className="h-10 border-[#EAE5DF]"
                 />
               </div>
 
-              <div className="p-3 bg-[#FFFBF5] rounded-lg border border-[#E8DDD3] flex items-center gap-2 text-xs text-[#78716C]">
-                <Sparkles className="w-4 h-4 text-[#D97706] shrink-0" />
-                <span>Default Mehendi, Sangeet &amp; Reception sub-events will be pre-created.</span>
+              {/* Default Functions Toggle */}
+              <div className="p-3.5 bg-[#FAF8F5] rounded-xl border border-[#EAE5DF] flex items-center justify-between gap-3">
+                <div className="space-y-0.5 pr-2">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-[#1F1E1C]">
+                    <Sparkles className="w-3.5 h-3.5 text-[#C5A059]" />
+                    <span>Include Default Functions</span>
+                  </div>
+                  <p className="text-[11px] text-[#6E6A63] leading-snug">
+                    {formData.includeDefaultFunctions
+                      ? "Pre-create standard ceremonies (Mehendi, Sangeet, Pheras & Reception). Timings can be edited anytime."
+                      : "Create a blank wedding. You can add your custom functions manually."}
+                  </p>
+                </div>
+                <Switch
+                  checked={formData.includeDefaultFunctions}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, includeDefaultFunctions: checked })
+                  }
+                />
               </div>
 
-              <DialogFooter className="pt-2">
+              <DialogFooter className="pt-3">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setOpenModal(false)}
-                  className="border-[#E8DDD3] cursor-pointer"
+                  className="border-[#EAE5DF] cursor-pointer"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={submitting}
-                  className="bg-[#B91C6C] hover:bg-[#9D174D] text-white cursor-pointer"
+                  className="bg-[#C5A059] hover:bg-[#B08D47] text-white cursor-pointer"
                 >
                   {submitting ? "Creating..." : "Create Wedding"}
                 </Button>
@@ -289,15 +371,15 @@ export default function WeddingsPage() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-48 bg-stone-200 rounded-2xl animate-pulse" />
+            <div key={i} className="h-52 bg-white rounded-2xl border border-[#EAE5DF] animate-pulse" />
           ))}
         </div>
       ) : weddings.length === 0 ? (
-        <Card className="border-[#E8DDD3] p-12 text-center bg-white">
-          <CalendarHeart className="w-12 h-12 text-[#B91C6C] mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-[#1C1917]">No Weddings Found</h3>
-          <p className="text-xs text-[#78716C] mt-1 mb-4">
-            Click the button above to register your first wedding.
+        <Card className="border-[#EAE5DF] p-12 text-center bg-white">
+          <CalendarHeart className="w-12 h-12 text-[#C5A059] mx-auto mb-3" />
+          <h3 className="font-serif text-xl font-bold text-[#1F1E1C]">No Weddings Found</h3>
+          <p className="text-xs text-[#6E6A63] mt-1 mb-4">
+            Click the button above to register your first wedding celebration.
           </p>
         </Card>
       ) : (
@@ -305,66 +387,79 @@ export default function WeddingsPage() {
           {weddings.map((w) => (
             <Card
               key={w.id}
-              className="border-[#E8DDD3] bg-white hover:border-[#B91C6C]/40 hover:shadow-md transition-all flex flex-col justify-between"
+              className="border-[#EAE5DF] bg-white hover:border-[#C5A059]/50 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] transition-all flex flex-col justify-between"
             >
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 p-6">
                 <div className="flex items-center justify-between">
-                  <Badge className="bg-[#FCE7F3] text-[#B91C6C] border-0 text-[10px] font-bold">
+                  <Badge variant="secondary" className="text-[10px] font-semibold uppercase tracking-wider">
                     {w.city}
                   </Badge>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-[#78716C]">
-                      {formatDate(w.weddingDate)}
-                    </span>
+                  <div className="flex items-center gap-1.5">
                     <Button
-                      variant="ghost"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenEdit(w)}
+                      className="h-7 px-2 text-[11px] font-medium text-[#1F1E1C] border-[#EAE5DF] hover:border-[#C5A059] hover:text-[#C5A059] transition-colors cursor-pointer"
+                      title="Edit Wedding Details"
+                    >
+                      <Pencil className="w-3 h-3 mr-1 text-[#C5A059]" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => setWeddingToDelete(w)}
-                      className="h-7 w-7 p-0 text-[#78716C] hover:text-red-600 hover:bg-red-50 transition-colors"
+                      className="h-7 px-2 text-[11px] font-medium text-rose-600 border-rose-200 bg-rose-50/50 hover:bg-rose-100 hover:text-rose-700 transition-colors cursor-pointer"
                       title="Delete Wedding"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-3 h-3 mr-1" />
+                      Delete
                     </Button>
                   </div>
                 </div>
-                <CardTitle className="text-lg font-bold text-[#1C1917] mt-2">
+                <CardTitle className="font-serif text-xl font-bold text-[#1F1E1C] mt-2.5">
                   {w.familyName}
                 </CardTitle>
-                <CardDescription className="text-xs text-[#78716C]">
+                <CardDescription className="text-xs text-[#6E6A63] font-medium">
                   {w.brideName} &amp; {w.groomName}
                 </CardDescription>
               </CardHeader>
 
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-2 text-xs text-[#78716C]">
-                  <MapPin className="w-3.5 h-3.5 shrink-0 text-[#B91C6C]" />
-                  <span className="truncate">{w.venue}</span>
+              <CardContent className="space-y-4 px-6 pb-6">
+                <div className="flex items-center justify-between text-xs text-[#6E6A63]">
+                  <span className="flex items-center gap-1.5 truncate">
+                    <MapPin className="w-3.5 h-3.5 shrink-0 text-[#C5A059]" />
+                    <span className="truncate">{w.venue}</span>
+                  </span>
+                  <span className="shrink-0 font-medium tabular-nums ml-2">
+                    {formatDate(w.weddingDate)}
+                  </span>
                 </div>
 
-                <div className="p-3 bg-[#FFFBF5] rounded-xl border border-[#E8DDD3] flex items-center justify-around text-center">
+                <div className="p-3.5 bg-[#FAF8F5] rounded-xl border border-[#EAE5DF] flex items-center justify-around text-center">
                   <div>
-                    <span className="text-[10px] font-bold uppercase text-[#78716C] block">
+                    <span className="text-[10px] font-semibold uppercase text-[#6E6A63] block">
                       Guests
                     </span>
-                    <span className="text-base font-black text-[#1C1917]">
+                    <span className="font-serif text-lg font-bold text-[#1F1E1C] tabular-nums">
                       {w._count.guests}
                     </span>
                   </div>
-                  <div className="w-px h-8 bg-[#E8DDD3]" />
+                  <div className="w-px h-8 bg-[#EAE5DF]" />
                   <div>
-                    <span className="text-[10px] font-bold uppercase text-[#78716C] block">
-                      Events
+                    <span className="text-[10px] font-semibold uppercase text-[#6E6A63] block">
+                      Ceremonies
                     </span>
-                    <span className="text-base font-black text-[#D97706]">
+                    <span className="font-serif text-lg font-bold text-[#C5A059] tabular-nums">
                       {w._count.events}
                     </span>
                   </div>
                 </div>
 
                 <Link href={`/weddings/${w.id}`} className="block">
-                  <Button className="w-full bg-[#B91C6C] hover:bg-[#9D174D] text-white text-xs font-semibold h-9 cursor-pointer">
+                  <Button className="w-full bg-[#1F2E23] hover:bg-[#152018] text-white text-xs font-medium h-9 cursor-pointer">
                     Manage Wedding &amp; Guests
-                    <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                    <ArrowRight className="w-3.5 h-3.5 ml-1.5 text-[#C5A059]" />
                   </Button>
                 </Link>
               </CardContent>
@@ -373,27 +468,144 @@ export default function WeddingsPage() {
         </div>
       )}
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={!!weddingToDelete} onOpenChange={(open) => !open && setWeddingToDelete(null)}>
-        <DialogContent className="max-w-md bg-white border-[#E8DDD3]">
+      {/* Edit Wedding Modal Dialog */}
+      <Dialog open={!!weddingToEdit} onOpenChange={(open) => !open && setWeddingToEdit(null)}>
+        <DialogContent className="max-w-md bg-white border-[#EAE5DF] rounded-2xl p-6">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-red-600 flex items-center gap-2">
-              <Trash2 className="w-5 h-5 text-red-600" />
-              Delete Wedding Celebration?
+            <DialogTitle className="font-serif text-2xl font-bold text-[#1F1E1C] flex items-center gap-2">
+              <Pencil className="w-5 h-5 text-[#C5A059]" />
+              Edit Wedding Details
             </DialogTitle>
-            <DialogDescription className="text-xs text-[#78716C] pt-2 leading-relaxed">
-              Are you sure you want to delete <strong className="text-[#1C1917] font-bold">&quot;{weddingToDelete?.familyName}&quot;</strong>?
-              <br /><br />
-              This will permanently delete the wedding and all of its associated sub-events, guests, RSVPs, and catering reports from both client and server. <strong>This action cannot be undone.</strong>
+            <DialogDescription className="text-xs text-[#6E6A63] pt-1">
+              Correct names, wedding date, city, or venue. Changes reflect immediately across all invites.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="pt-3 gap-2 sm:gap-0">
+
+          <form onSubmit={handleUpdateWedding} className="space-y-4 pt-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="list-edit-bride" className="text-xs font-semibold text-[#6E6A63]">
+                  Bride&apos;s Name
+                </Label>
+                <Input
+                  id="list-edit-bride"
+                  value={editFormData.brideName}
+                  onChange={(e) => setEditFormData({ ...editFormData, brideName: e.target.value })}
+                  required
+                  className="h-10 border-[#EAE5DF]"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="list-edit-groom" className="text-xs font-semibold text-[#6E6A63]">
+                  Groom&apos;s Name
+                </Label>
+                <Input
+                  id="list-edit-groom"
+                  value={editFormData.groomName}
+                  onChange={(e) => setEditFormData({ ...editFormData, groomName: e.target.value })}
+                  required
+                  className="h-10 border-[#EAE5DF]"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="list-edit-family" className="text-xs font-semibold text-[#6E6A63]">
+                Wedding Title / Family Name
+              </Label>
+              <Input
+                id="list-edit-family"
+                value={editFormData.familyName}
+                onChange={(e) => setEditFormData({ ...editFormData, familyName: e.target.value })}
+                required
+                className="h-10 border-[#EAE5DF]"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="list-edit-date" className="text-xs font-semibold text-[#6E6A63]">
+                  Main Wedding Date
+                </Label>
+                <Input
+                  id="list-edit-date"
+                  type="date"
+                  value={editFormData.weddingDate}
+                  onChange={(e) => setEditFormData({ ...editFormData, weddingDate: e.target.value })}
+                  required
+                  className="h-10 border-[#EAE5DF]"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="list-edit-city" className="text-xs font-semibold text-[#6E6A63]">
+                  City
+                </Label>
+                <Input
+                  id="list-edit-city"
+                  value={editFormData.city}
+                  onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
+                  required
+                  className="h-10 border-[#EAE5DF]"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="list-edit-venue" className="text-xs font-semibold text-[#6E6A63]">
+                Main Venue Name
+              </Label>
+              <Input
+                id="list-edit-venue"
+                value={editFormData.venue}
+                onChange={(e) => setEditFormData({ ...editFormData, venue: e.target.value })}
+                required
+                className="h-10 border-[#EAE5DF]"
+              />
+            </div>
+
+            <DialogFooter className="pt-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setWeddingToEdit(null)}
+                disabled={editing}
+                className="border-[#EAE5DF] cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={editing}
+                className="bg-[#C5A059] hover:bg-[#B08D47] text-white cursor-pointer"
+              >
+                {editing ? "Saving..." : "Save Wedding Changes"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!weddingToDelete} onOpenChange={(open) => !open && setWeddingToDelete(null)}>
+        <DialogContent className="max-w-md bg-white border-[#EAE5DF] rounded-2xl p-6">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl font-bold text-rose-600 flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-rose-600" />
+              Remove Wedding Celebration?
+            </DialogTitle>
+            <DialogDescription className="text-xs text-[#6E6A63] pt-2 leading-relaxed">
+              Are you sure you want to remove <strong className="text-[#1F1E1C] font-semibold">&quot;{weddingToDelete?.familyName}&quot;</strong>?
+              <br /><br />
+              This will remove this wedding celebration, all its functions (Mehendi, Sangeet, etc.), guest lists, and Halwai catering sheets. <strong className="text-rose-600">This action cannot be undone.</strong>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="pt-4 gap-2 sm:gap-0">
             <Button
               type="button"
               variant="outline"
               onClick={() => setWeddingToDelete(null)}
               disabled={deleting}
-              className="border-[#E8DDD3] cursor-pointer"
+              className="border-[#EAE5DF] cursor-pointer"
             >
               Cancel
             </Button>
@@ -402,9 +614,9 @@ export default function WeddingsPage() {
               variant="destructive"
               onClick={handleDeleteWedding}
               disabled={deleting}
-              className="bg-red-600 hover:bg-red-700 text-white cursor-pointer"
+              className="bg-rose-600 hover:bg-rose-700 text-white cursor-pointer"
             >
-              {deleting ? "Deleting..." : "Yes, Delete Wedding"}
+              {deleting ? "Removing..." : "Yes, Remove Wedding"}
             </Button>
           </DialogFooter>
         </DialogContent>
