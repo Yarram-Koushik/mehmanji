@@ -15,7 +15,7 @@
 ---
 
 ## 🌐 Live Production Demo
-👉 **[https://mehmanji1.vercel.app](https://mehmanji1.vercel.app)**
+👉 **https://mehmanji-five.vercel.app/**
 
 - **Instant Demo Login:** Go to `/login` and click the **"Auto-fill"** demo button to sign in as *Priya Sharma* with 1 click!
 - **Sample Guest WhatsApp RSVP Experience:** [Try a Live Guest Invitation](https://mehmanji1.vercel.app/rsvp/cmwkzep7d000munl01w30sxxh)
